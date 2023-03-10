@@ -133,11 +133,19 @@ INTERRUPT_HANDLER(EXTI_PORTB_IRQHandler, 4)
   * @param  None
   * @retval None
   */
+
+
+extern uint16_t IR_message;
+extern bool     IR_FlagBusy;
+
+uint32_t IR_receive = 0;
+uint16_t edge_time_us = 0;
+
 INTERRUPT_HANDLER(EXTI_PORTC_IRQHandler, 5)
 {
-  /* In order to detect unexpected events during development,
-     it is recommended to set a breakpoint on the following instruction.
-  */
+    // měřím délky jednotlivých hran
+    edge_time_us = TIM2_GetCounter();
+    TIM2_SetCounter(0);
 }
 
 /**

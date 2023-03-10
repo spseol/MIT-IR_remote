@@ -8,6 +8,13 @@
 #define READ(BAGR) GPIO_ReadInputPin(BAGR##_PORT, BAGR##_PIN) 
 #define PUSH(BAGR) (GPIO_ReadInputPin(BAGR##_PORT, BAGR##_PIN)==RESET) 
 
+
+#define IR_PORT GPIOC
+#define IR_PIN GPIO_PIN_4
+#define LOOP_PORT GPIOD
+#define LOOP_PIN GPIO_PIN_3
+
+
 #ifdef STM8S003
 #define LED_PORT GPIOD
 #define LED_PIN  GPIO_PIN_0

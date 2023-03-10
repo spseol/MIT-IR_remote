@@ -35,3 +35,4 @@ _putchar
 _init_uart1
 _UART1_SendData8
 _UART1_DeInit
+_HSIDivFactor
