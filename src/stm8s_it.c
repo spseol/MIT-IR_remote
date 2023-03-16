@@ -139,15 +139,22 @@ INTERRUPT_HANDLER(EXTI_PORTB_IRQHandler, 4)
 
 extern uint16_t IR_message;
 extern uint8_t  IR_repeat;
-extern bool     IR_FlagBusy;
+extern bool     IR_Flag;
 
-uint32_t IR_receive = 0;
+uint32_t IR_tmp_message = 0;
 uint16_t edge_time_us = 0;
 uint8_t i = 0;              // počet zachycených bitů
-int8_t A, B, C, D;
+uint8_t A, B, C, D;
 
 INTERRUPT_HANDLER(EXTI_PORTC_IRQHandler, 5)
 {
+    /*if (IR_Flag) { */
+    /* Jsem ochoten zahájit měření jen tehdy, pokud hlavní smyčka
+     * již zpracovala naposledy přijatý znak. To znamená, že v hlavní smyčce
+     * musím tuto vlajku shodit. */
+    /*    return; */
+    /*} */
+
     // měřím délky jednotlivých hran
     edge_time_us = TIM2_GetCounter();
     TIM2_SetCounter(0);
@@ -155,47 +162,47 @@ INTERRUPT_HANDLER(EXTI_PORTC_IRQHandler, 5)
     // začátek start-bitu
     if (TIM2_GetFlagStatus(TIM2_FLAG_UPDATE) || edge_time_us > 20000) {
         TIM2_ClearFlag(TIM2_FLAG_UPDATE);
-        IR_FlagBusy = TRUE;
-        REVERSE(LED);
+        //REVERSE(LED);
         return;
     }
-
     // konec start-bitu
     if (edge_time_us > 13000 && edge_time_us < 14000) {
-        IR_receive = 0;
-        IR_repeat = 0;
+        IR_tmp_message = 0;
+        IR_repeat = 1;
         i = 0;
         return;
     }
-
     // sekvence signalizující opakování
     if (edge_time_us > 11000 && edge_time_us < 12000) {
         IR_repeat++;
+        IR_Flag = TRUE; // zakomentování toho řádku způsobí malinko jiné chování
         return;
     }
-
     // log. 0
     if (edge_time_us > 1100 && edge_time_us < 1300) {
         i++;
-        IR_receive <<= 1;
-        REVERSE(LOOP);
+        IR_tmp_message <<= 1;
+        //REVERSE(LOOP);
     }
     // log. 1
     if (edge_time_us > 2000 && edge_time_us < 2300) {
         i++;
-        IR_receive <<= 1;
-        IR_receive |= 1;
-        REVERSE(LOOP);
+        IR_tmp_message <<= 1;
+        IR_tmp_message |= 1;
+        //REVERSE(LOOP);
     }
 
     if (i >= 32) {
-        A = IR_receive >> 24;
-        B = IR_receive >> 16;
-        C = IR_receive >> 8;
-        D = IR_receive & 0x000000FFL;
-        printf("%08lX %02X %02X %02X %02X\n",  IR_receive, A, ~B, C, ~D);
-        if (A == ~B && C == ~D) {
-            printf("OK\n");
+        A = (IR_tmp_message >> 24);
+        B = (IR_tmp_message >> 16);
+        C = (IR_tmp_message >> 8);
+        D = IR_tmp_message & 0xFF;
+        /*printf("%08lX %02X %02X %02X %02X\n", IR_tmp_message, A, ~B & 0xFF, C, ~D & 0xFF);*/
+        if ((A & 0xFF) == (~B & 0xFF) && (C & 0xFF) == (~D & 0xFF)
+            && !IR_Flag) {
+            //printf("OK\n");
+            IR_message = ((int16_t) A << 8) | C;
+            IR_Flag = TRUE;
         }
     }
 }

@@ -31,9 +31,9 @@ void setup(void)
     init_uart1();
 }
 
-uint16_t IR_message = 0;
-uint16_t IR_repeat = 0;
-bool IR_FlagBusy = FALSE;
+volatile uint16_t IR_message = 0;  // číslo, které přišlo z ovladače
+volatile uint8_t IR_repeat = 0;   // počet opakování zprávy (přidržení tlačítka)
+volatile bool IR_Flag = FALSE;   // vlajka oznamuje, že přišla nová zpráva
 
 
 int main(void)
@@ -45,8 +45,12 @@ int main(void)
     printf("Startujme to!!!\n");
 
     while (1) {
-        if (milis() - time > 333 ) {
+        if (milis() - time > 33 ) {
             time = milis();
+            if (IR_Flag) {
+                printf("%04X %5d (x%d)\n", IR_message, IR_message, IR_repeat);
+                IR_Flag = FALSE;
+            }
         }
 
     }
