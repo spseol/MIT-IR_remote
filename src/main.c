@@ -32,6 +32,7 @@ void setup(void)
 }
 
 uint16_t IR_message = 0;
+uint16_t IR_repeat = 0;
 bool IR_FlagBusy = FALSE;
 
 

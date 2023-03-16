@@ -36,3 +36,9 @@ _init_uart1
 _UART1_SendData8
 _UART1_DeInit
 _HSIDivFactor
+_UART1_GetFlagStatus
+_GPIO_WriteReverse
+_TIM2_GetFlagStatus
+_TIM2_ClearFlag
+_UART1_Init
+_UART1_Cmd
